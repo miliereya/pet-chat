@@ -6,6 +6,7 @@ import { MongooseModule } from '@nestjs/mongoose'
 import { UserSchema } from 'src/user/schemas/user.schema'
 import { JwtModule } from '@nestjs/jwt'
 import { UserModule } from 'src/user/user.module'
+import { ConnectModule } from 'src/connect/connect.module'
 
 @Module({
 	imports: [
@@ -17,6 +18,7 @@ import { UserModule } from 'src/user/user.module'
 			signOptions: { expiresIn: '60s' },
 		}),
 		UserModule,
+		ConnectModule,
 	],
 	controllers: [AuthController],
 	providers: [AuthService],

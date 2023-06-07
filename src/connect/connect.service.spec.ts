@@ -101,7 +101,7 @@ describe('connect.service.spec.ts', () => {
 			await connectService.createEntity(testUserId)
 			await connectService.addConnection(testUserId, testSocketId)
 			await connectService.addConnection(testUserId, testSocketId2)
-			await connectService.removeConnection(testUserId, testSocketId)
+			await connectService.removeConnection(testSocketId)
 			const userConnection = await connectService.findUserConnection(
 				testUserId
 			)
@@ -112,7 +112,7 @@ describe('connect.service.spec.ts', () => {
 		it('should remove 1 of 1 socketIds', async () => {
 			await connectService.createEntity(testUserId)
 			await connectService.addConnection(testUserId, testSocketId)
-			await connectService.removeConnection(testUserId, testSocketId)
+			await connectService.removeConnection(testSocketId)
 			const userConnection = await connectService.findUserConnection(
 				testUserId
 			)

@@ -5,7 +5,9 @@ import { User } from './schemas/user.schema'
 import { ChatService } from 'src/chat/chat.service'
 import { FindUsersDto, UpdateAvatarDto, pickUserPublicData } from './dto'
 import { TypeUserSearchMongooseParams } from './types'
-import { UserDataPublicData, UserWithId } from './types/user-data.type'
+import { PickChatData } from 'src/chat/dto'
+import { PopulatedChatWithPublicUsers } from 'src/chat/types'
+import { TimeStampsWithId } from 'src/types'
 
 @Injectable()
 export class UserService {
@@ -58,20 +60,10 @@ export class UserService {
 			never
 		>
 	) {
-		const chats = []
+		const chats: (PopulatedChatWithPublicUsers & TimeStampsWithId)[] = []
 		for (let i = 0; i < user.chats.length; i++) {
 			const chat = await this.chatService.getOneChat(user.chats[i])
-			const users: UserDataPublicData[] = []
-			for (let l = 0; l < chat.users.length; l++) {
-				users.push(pickUserPublicData(chat.users[l]))
-			}
-			chats.push({
-				_id: chat._id,
-				createdAt: chat.createdAt,
-				updatedAt: chat.updatedAt,
-				messages: chat.messages,
-				users,
-			})
+			chats.push(PickChatData(chat))
 		}
 		return {
 			user: pickUserPublicData(user),

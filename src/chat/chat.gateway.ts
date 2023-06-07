@@ -3,17 +3,19 @@ import {
 	MessageBody,
 	SubscribeMessage,
 	WebSocketGateway,
+	WebSocketServer,
 } from '@nestjs/websockets'
 import { ChatService } from './chat.service'
 import { ChatActions } from './types'
-import { ConnectDto, StartChatDto } from './dto'
-import { Socket } from 'socket.io'
+import { ConnectDto, DeleteChatDto, StartChatDto } from './dto'
+import { Socket, Server } from 'socket.io'
 import { ConnectService } from 'src/connect/connect.service'
+import { ClientUrl } from 'src/config/constants'
 
 @WebSocketGateway({
 	cors: {
 		credentials: true,
-		origin: process.env.CLIENT_URL,
+		origin: ClientUrl,
 	},
 })
 export class ChatGateway {
@@ -27,7 +29,7 @@ export class ChatGateway {
 		@MessageBody() connectDto: ConnectDto,
 		@ConnectedSocket() client: Socket
 	) {
-		this.chatService.connect(connectDto, client.id)
+		await this.chatService.connect(connectDto, client.id)
 	}
 
 	@SubscribeMessage(ChatActions.start)
@@ -38,11 +40,11 @@ export class ChatGateway {
 		return this.chatService.startChat(startChatDto, client)
 	}
 
-	// @SubscribeMessage(ChatActions.delete)
-	// async deleteChat(
-	// 	@MessageBody() deleteChatDto: DeleteChatDto,
-	// 	@ConnectedSocket() client: Socket
-	// ) {
-	// 	await this.chatService.deleteChat(deleteChatDto, client)
-	// }
+	@SubscribeMessage(ChatActions.delete)
+	async deleteChat(
+		@MessageBody() deleteChatDto: DeleteChatDto,
+		@ConnectedSocket() client: Socket
+	) {
+		await this.chatService.deleteChat(deleteChatDto, client)
+	}
 }

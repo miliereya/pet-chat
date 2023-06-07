@@ -11,7 +11,7 @@ export class ConnectService {
 	) {}
 
 	async createEntity(userId: Types.ObjectId) {
-		await this.userConnectionModel.create({ userId })
+		await this.userConnectionModel.create({ userId: String(userId) })
 	}
 
 	async findUserConnection(userId: Types.ObjectId) {
@@ -25,9 +25,9 @@ export class ConnectService {
 		)
 	}
 
-	async removeConnection(userId: Types.ObjectId, socketId: string) {
+	async removeConnection(socketId: string) {
 		await this.userConnectionModel.updateOne(
-			{ userId },
+			{ socketIds: { $all: socketId } },
 			{ $pull: { socketIds: socketId } }
 		)
 	}
