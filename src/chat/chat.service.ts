@@ -84,14 +84,15 @@ export class ChatService {
 		action: string,
 		data: any
 	) {
-		const allConnections = []
+		let allConnections = []
 		for (let i = 0; i < userIds.length; i++) {
 			const userConnection = await this.connectService.findUserConnection(
 				userIds[i]
 			)
 			allConnections.push(...userConnection.socketIds)
 		}
-		allConnections.filter((c) => c !== client.id)
+		allConnections = allConnections.filter((c) => c !== client.id)
+
 		for (let i = 0; i < allConnections.length; i++) {
 			client.to(allConnections[i]).emit(action, data, (err, res) => {
 				console.log(err, res)
