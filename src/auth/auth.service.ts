@@ -5,14 +5,14 @@ import {
 } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { Model, Types } from 'mongoose'
-import { User } from 'src/user/schemas/user.schema'
+import { User } from '../user/schemas/user.schema'
 import { JwtService } from '@nestjs/jwt'
 import { JwtPayload } from './types'
 import { hash, genSalt, compare } from 'bcryptjs'
 import { UserService } from '../user/user.service'
 import { ConfigService } from '@nestjs/config'
 import { LoginDto, RegistrationDto } from './dto'
-import { ConnectService } from 'src/connect/connect.service'
+import { ConnectService } from '../connect/connect.service'
 
 @Injectable()
 export class AuthService {
@@ -91,12 +91,14 @@ export class AuthService {
 	private async generateTokens(payload: JwtPayload) {
 		const accessToken = await this.jwtService.signAsync(payload, {
 			expiresIn: '20m',
-			secret: this.configService.get<string>('jwt.accessSecret'),
+			secret:
+				this.configService.get<string>('jwt.accessSecret') || 'secret',
 		})
 
 		const refreshToken = await this.jwtService.signAsync(payload, {
 			expiresIn: '15d',
-			secret: this.configService.get<string>('jwt.refreshSecret'),
+			secret:
+				this.configService.get<string>('jwt.refreshSecret') || 'secret',
 		})
 		return { accessToken, refreshToken }
 	}
