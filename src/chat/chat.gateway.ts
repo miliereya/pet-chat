@@ -3,13 +3,18 @@ import {
 	MessageBody,
 	SubscribeMessage,
 	WebSocketGateway,
-	WebSocketServer,
 } from '@nestjs/websockets'
 import { ChatService } from './chat.service'
-import { ChatActions } from './types'
-import { ConnectDto, DeleteChatDto, StartChatDto } from './dto'
-import { Socket, Server } from 'socket.io'
-import { ConnectService } from 'src/connect/connect.service'
+import { ChatActions, MessageActions } from './types'
+import {
+	ConnectDto,
+	CreateMessageDto,
+	DeleteChatDto,
+	DeleteMessageDto,
+	EditMessageDto,
+	StartChatDto,
+} from './dto'
+import { Socket } from 'socket.io'
 import { ClientUrl } from 'src/config/constants'
 
 @WebSocketGateway({
@@ -19,10 +24,7 @@ import { ClientUrl } from 'src/config/constants'
 	},
 })
 export class ChatGateway {
-	constructor(
-		private readonly chatService: ChatService,
-		private readonly connectService: ConnectService
-	) {}
+	constructor(private readonly chatService: ChatService) {}
 
 	@SubscribeMessage(ChatActions.connect)
 	async connect(
@@ -46,5 +48,29 @@ export class ChatGateway {
 		@ConnectedSocket() client: Socket
 	) {
 		await this.chatService.deleteChat(deleteChatDto, client)
+	}
+
+	@SubscribeMessage(MessageActions.send_message)
+	async sendMessage(
+		@MessageBody() createMessageDto: CreateMessageDto,
+		@ConnectedSocket() client: Socket
+	) {
+		await this.chatService.createMessage(createMessageDto, client)
+	}
+
+	@SubscribeMessage(MessageActions.edit)
+	async editMessage(
+		@MessageBody() editMessageDto: EditMessageDto,
+		@ConnectedSocket() client: Socket
+	) {
+		await this.chatService.editMessage(editMessageDto, client)
+	}
+
+	@SubscribeMessage(MessageActions.delete)
+	async deleteMessage(
+		@MessageBody() deleteMessageDto: DeleteMessageDto,
+		@ConnectedSocket() client: Socket
+	) {
+		await this.chatService.deleteMessage(deleteMessageDto, client)
 	}
 }

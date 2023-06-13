@@ -4,7 +4,7 @@ import { Connection, Model, connect } from 'mongoose'
 import { User, UserSchema } from '../user/schemas/user.schema'
 import { MongoMemoryServer } from 'mongodb-memory-server'
 import { getModelToken } from '@nestjs/mongoose'
-import { BadRequestException } from '@nestjs/common'
+import { BadRequestException, UnauthorizedException } from '@nestjs/common'
 import { ChatService } from '../chat/chat.service'
 import { JwtService } from '@nestjs/jwt'
 import { UserService } from '../user/user.service'
@@ -84,13 +84,23 @@ describe('auth.service.spec.ts', () => {
 	const email = 'test@mail.ru'
 	const password = 'testpassword'
 	const username = 'username'
+	const wrongPassword = 'wrongpassword'
+	const wrongRefreshToken =
+		'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NDg4OTZiZTU5Yzg0MzI5NTQ1MmE3MzciLCJpYXQiOjE2ODY2NzMwODYsImV4cCI6MTY4Nzk2OTA4Nn0.ifr_ZogtB0dioEJxdp0qs6uUzkQfqFQj1QEyPQBgB0o'
+
+	const invalidRefreshToken = 'invalidrefreshtoken'
+
+	const registerDto = {
+		email,
+		password,
+		username,
+	}
+	const loginDto = {
+		email,
+		password,
+	}
 
 	describe('registration()', () => {
-		const registerDto = {
-			email,
-			password,
-			username,
-		}
 		it('should add new user', async () => {
 			const userData = await authService.registration(registerDto)
 			expect(userData.user.email).toStrictEqual(email)
@@ -101,6 +111,63 @@ describe('auth.service.spec.ts', () => {
 			await authService.registration(registerDto)
 			await expect(authService.registration(registerDto)).rejects.toThrow(
 				new BadRequestException('This email is already taken')
+			)
+		})
+	})
+
+	describe('login()', () => {
+		it('should login', async () => {
+			await authService.registration(registerDto)
+			const userData = await authService.login(loginDto)
+			expect(userData.user.email).toStrictEqual(email)
+			expect(userData.user.username).toStrictEqual(username)
+		})
+
+		it('should throw 400 (No user by following email)', async () => {
+			await expect(authService.login(loginDto)).rejects.toThrow(
+				new BadRequestException('No user by following email')
+			)
+		})
+
+		it('should throw 400 (Wrong credentials)', async () => {
+			await authService.registration(registerDto)
+			await expect(
+				authService.login({ ...loginDto, password: wrongPassword })
+			).rejects.toThrow(new BadRequestException('Wrong credentials'))
+		})
+	})
+
+	describe('refresh()', () => {
+		it('should return user data', async () => {
+			const userData = await authService.registration(registerDto)
+			const refreshData = await authService.refresh(
+				userData.tokens.refreshToken
+			)
+			expect(refreshData.user.email).toStrictEqual(registerDto.email)
+			expect(refreshData.user.username).toStrictEqual(
+				registerDto.username
+			)
+		})
+
+		it('should throw 400 (No refresh token was provided)', async () => {
+			await authService.registration(registerDto)
+			await expect(authService.refresh(null as string)).rejects.toThrow(
+				new BadRequestException('No refresh token was provided')
+			)
+		})
+
+		it('should throw 400 (Wrong refresh token)', async () => {
+			await expect(
+				authService.refresh(invalidRefreshToken)
+			).rejects.toThrow(new UnauthorizedException('Wrong refresh token'))
+		})
+
+		it('should throw 400 (No user by following email)', async () => {
+			await authService.registration(registerDto)
+			await expect(
+				authService.refresh(wrongRefreshToken)
+			).rejects.toThrow(
+				new UnauthorizedException('No user by following email')
 			)
 		})
 	})

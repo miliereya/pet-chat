@@ -1,5 +1,12 @@
 import { Injectable } from '@nestjs/common'
-import { ConnectDto, DeleteChatDto, StartChatDto } from './dto'
+import {
+	ConnectDto,
+	CreateMessageDto,
+	DeleteChatDto,
+	DeleteMessageDto,
+	EditMessageDto,
+	StartChatDto,
+} from './dto'
 import { ConnectService } from '../connect/connect.service'
 import { InjectModel } from '@nestjs/mongoose'
 import { Model, Types } from 'mongoose'
@@ -9,7 +16,8 @@ import { PopulatedChat } from './types/chat/chat-populated.type'
 import { pickUserPublicDataArray } from '../user/dto'
 import { User } from 'src/user/schemas/user.schema'
 import { Socket } from 'socket.io'
-import { ChatActions } from './types'
+import { ChatActions, MessageActions } from './types'
+import { LikeMessageDto } from './dto/message/like-message.dto'
 
 @Injectable()
 export class ChatService {
@@ -76,6 +84,83 @@ export class ChatService {
 			chatId: chat._id,
 		})
 		await chat.deleteOne()
+	}
+
+	async createMessage(createMessageDto: CreateMessageDto, client: Socket) {
+		const message = await this.messageModel.create(createMessageDto)
+		const chat = await this.chatModel.findByIdAndUpdate(
+			createMessageDto.chatId,
+			{ $push: { messages: message._id } }
+		)
+
+		await this.broadcast(
+			chat.users,
+			client,
+			MessageActions.receive_new,
+			message
+		)
+		return message
+	}
+
+	async editMessage(editMessageDto: EditMessageDto, client: Socket) {
+		const editDate = new Date()
+		const message = await this.messageModel.findByIdAndUpdate(
+			editMessageDto.messageId,
+			{
+				text: editMessageDto.text,
+				attachedFiles: editMessageDto.attachedFiles,
+				editedByUser: editDate,
+			}
+		)
+		const chat = await this.chatModel.findById(message.chatId)
+		await this.broadcast(
+			chat.users,
+			client,
+			MessageActions.receive_edit,
+			message
+		)
+		return message
+	}
+
+	async likeMessage(likeMessageDto: LikeMessageDto, client: Socket) {
+		const message = await this.messageModel.findById(
+			likeMessageDto.messageId
+		)
+
+		message.likedBy.includes(likeMessageDto.userId)
+			? (message.likedBy = message.likedBy.filter(
+					(user) => user !== likeMessageDto.userId
+			  ))
+			: message.likedBy.push(likeMessageDto.userId)
+
+		const chat = await this.chatModel.findById(message.chatId)
+		await this.broadcast(
+			chat.users,
+			client,
+			MessageActions.receive_like,
+			message
+		)
+		return message
+	}
+
+	async deleteMessage(deleteMessageDto: DeleteMessageDto, client: Socket) {
+		const message = await this.messageModel.findById(
+			deleteMessageDto.messageId
+		)
+		const chat = await this.chatModel.findByIdAndUpdate(
+			message.chatId,
+			{
+				$pull: { messages: message._id },
+			},
+			{ new: true }
+		)
+		await this.broadcast(
+			chat.users,
+			client,
+			MessageActions.receive_delete,
+			message
+		)
+		await message.deleteOne()
 	}
 
 	private async broadcast(

@@ -63,7 +63,9 @@ export class AuthService {
 			const refreshTokenData = await this.jwtService.verifyAsync(
 				refreshToken,
 				{
-					secret: this.configService.get<string>('jwt.refreshSecret'),
+					secret:
+						this.configService.get<string>('jwt.refreshSecret') ||
+						'secret',
 				}
 			)
 
@@ -73,7 +75,9 @@ export class AuthService {
 
 			const accessToken = await this.jwtService.signAsync(payload, {
 				expiresIn: '20m',
-				secret: this.configService.get<string>('jwt.accessSecret'),
+				secret:
+					this.configService.get<string>('jwt.accessSecret') ||
+					'secret',
 			})
 			const user = await this.userModel.findById(payload._id)
 			if (!user)
@@ -84,6 +88,12 @@ export class AuthService {
 				...userData,
 			}
 		} catch (e) {
+			if (
+				e.response &&
+				e.response.message === 'No user by following email'
+			)
+				throw new UnauthorizedException('No user by following email')
+
 			throw new UnauthorizedException('Wrong refresh token')
 		}
 	}

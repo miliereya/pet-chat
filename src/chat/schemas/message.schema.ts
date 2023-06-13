@@ -14,6 +14,12 @@ export class Message {
 
 	@Prop()
 	likedBy: Types.ObjectId[]
+
+	@Prop()
+	attachedFiles: string[]
+
+	@Prop({ required: false })
+	editedByUser?: Date
 }
 
 export const MessageSchema = SchemaFactory.createForClass(Message)

@@ -45,13 +45,6 @@ export class UserService {
 		return pickUserPublicData(user)
 	}
 
-	// private async findById(_id: Types.ObjectId) {
-	// 	const user = await this.userModel.findById(_id)
-	// 	if (!user) throw new NotFoundException('No user by following id')
-
-	// 	return user
-	// }
-
 	async getUserDataWithChats(
 		user: Omit<
 			User & {

@@ -2,12 +2,9 @@ import { IsArray, IsString } from 'class-validator'
 import { IsObjectId } from 'class-validator-mongo-object-id'
 import { Types } from 'mongoose'
 
-export class CreateMessageDto {
+export class EditMessageDto {
 	@IsObjectId()
-	chatId: Types.ObjectId
-
-	@IsString()
-	user: Types.ObjectId
+	messageId: Types.ObjectId
 
 	@IsString()
 	text: string
