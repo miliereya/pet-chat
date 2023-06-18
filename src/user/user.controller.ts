@@ -4,7 +4,7 @@ import { Auth } from 'src/auth/decorators/auth.decorator'
 import { UserId } from './decorators/userId.decorator'
 import { Types } from 'mongoose'
 import { TypeUserSearch } from './types'
-import { UpdateAvatarDto } from './dto'
+import { UpdateAvatarDto, UpdateUsernameDto } from './dto'
 
 @Controller('user')
 export class UserController {
@@ -28,10 +28,19 @@ export class UserController {
 
 	@Post('update-avatar')
 	@Auth()
-	async check(
+	async updateAvatar(
 		@UserId() userId: Types.ObjectId,
 		@Body() dto: UpdateAvatarDto
 	) {
 		return this.userService.updateAvatar(userId, dto)
+	}
+
+	@Post('update-username')
+	@Auth()
+	async updateUsername(
+		@UserId() userId: Types.ObjectId,
+		@Body() dto: UpdateUsernameDto
+	) {
+		return this.userService.updateUsername(userId, dto)
 	}
 }

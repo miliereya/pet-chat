@@ -3,7 +3,12 @@ import { InjectModel } from '@nestjs/mongoose'
 import { Model, Types } from 'mongoose'
 import { User } from './schemas/user.schema'
 import { ChatService } from '../chat/chat.service'
-import { FindUsersDto, UpdateAvatarDto, pickUserPublicData } from './dto'
+import {
+	FindUsersDto,
+	UpdateAvatarDto,
+	UpdateUsernameDto,
+	pickUserPublicData,
+} from './dto'
 import { TypeUserSearchMongooseParams } from './types'
 import { PickChatData } from '../chat/dto'
 import { PopulatedChatWithPublicUsers } from 'src/chat/types'
@@ -35,6 +40,18 @@ export class UserService {
 		if (!user) throw new NotFoundException('No user by following id')
 		return {
 			avatar: user.avatar,
+		}
+	}
+
+	async updateUsername(userId: Types.ObjectId, dto: UpdateUsernameDto) {
+		const user = await this.userModel.findByIdAndUpdate(
+			userId,
+			{ username: dto.username },
+			{ new: true }
+		)
+		if (!user) throw new NotFoundException('No user by following id')
+		return {
+			username: user.username,
 		}
 	}
 
