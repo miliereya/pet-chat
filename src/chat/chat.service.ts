@@ -65,6 +65,12 @@ export class ChatService {
 		return { ...chat, users }
 	}
 
+	async checkIfChatExist(userIds: Types.ObjectId[]) {
+		return this.chatModel
+			.findOne({ users: { $all: userIds } })
+			.populate('messages')
+	}
+
 	async deleteChat(deleteChatDto: DeleteChatDto, client: Socket) {
 		const chat = await this.chatModel.findById(deleteChatDto.chatId)
 		if (!chat) {

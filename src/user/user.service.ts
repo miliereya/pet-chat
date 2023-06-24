@@ -26,9 +26,19 @@ export class UserService {
 			_id: { $ne: dto.userId },
 			[dto.searchField]: new RegExp(dto.value, 'i'),
 		}
-		return await this.userModel
+		const users = await this.userModel
 			.find(query)
 			.select('_id email avatar username')
+
+		const usersData = []
+		for (let i = 0; i < users.length; i++) {
+			const chat = await this.chatService.checkIfChatExist([
+				dto.userId,
+				users[i]._id,
+			])
+			usersData.push({ ...users[i], chat: chat || null })
+		}
+		return usersData
 	}
 
 	async updateAvatar(userId: Types.ObjectId, dto: UpdateAvatarDto) {
