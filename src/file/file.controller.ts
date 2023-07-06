@@ -12,7 +12,7 @@ import { Auth } from 'src/auth/decorators/auth.decorator'
 
 @Controller('files')
 export class FileController {
-	constructor(private readonly FileService: FileService) {}
+	constructor(private readonly fileService: FileService) {}
 
 	@Post('upload')
 	@HttpCode(200)
@@ -22,13 +22,13 @@ export class FileController {
 		@UploadedFile() file: Express.Multer.File,
 		@Query('folder') folder: string
 	) {
-		return this.FileService.saveFile(file, folder)
+		return this.fileService.saveFile(file, folder)
 	}
 
 	@Delete('delete')
 	@HttpCode(200)
 	@Auth()
 	async deleteFile(@Query('path') path: string) {
-		return this.FileService.deleteFile(path)
+		return this.fileService.deleteFile(path)
 	}
 }

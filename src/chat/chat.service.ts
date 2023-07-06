@@ -65,10 +65,12 @@ export class ChatService {
 		return { ...chat, users }
 	}
 
-	async checkIfChatExist(userIds: Types.ObjectId[]) {
-		return this.chatModel
+	async checkIfChatExist(userIds: string[]) {
+		const chat = await this.chatModel
 			.findOne({ users: { $all: userIds } })
 			.populate('messages')
+			.populate('users')
+		return chat ? chat.toObject() : chat
 	}
 
 	async deleteChat(deleteChatDto: DeleteChatDto, client: Socket) {
@@ -116,7 +118,8 @@ export class ChatService {
 				text: editMessageDto.text,
 				attachedFiles: editMessageDto.attachedFiles,
 				editedByUser: editDate,
-			}
+			},
+			{ new: true }
 		)
 		const chat = await this.chatModel.findById(message.chatId)
 		await this.broadcast(
@@ -132,12 +135,15 @@ export class ChatService {
 		const message = await this.messageModel.findById(
 			likeMessageDto.messageId
 		)
-
 		message.likedBy.includes(likeMessageDto.userId)
 			? (message.likedBy = message.likedBy.filter(
 					(user) => user !== likeMessageDto.userId
 			  ))
 			: message.likedBy.push(likeMessageDto.userId)
+
+		await this.messageModel.findByIdAndUpdate(message._id, {
+			likedBy: message.likedBy,
+		})
 
 		const chat = await this.chatModel.findById(message.chatId)
 		await this.broadcast(
@@ -185,9 +191,7 @@ export class ChatService {
 		allConnections = allConnections.filter((c) => c !== client.id)
 
 		for (let i = 0; i < allConnections.length; i++) {
-			client.to(allConnections[i]).emit(action, data, (err, res) => {
-				console.log(err, res)
-			})
+			client.to(allConnections[i]).emit(action, data)
 		}
 	}
 }

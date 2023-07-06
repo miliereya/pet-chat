@@ -33,11 +33,12 @@ export class UserService {
 		const usersData = []
 		for (let i = 0; i < users.length; i++) {
 			const chat = await this.chatService.checkIfChatExist([
-				dto.userId,
-				users[i]._id,
+				dto.userId.toString(),
+				users[i]._id.toString(),
 			])
-			usersData.push({ ...users[i], chat: chat || null })
+			usersData.push({ ...users[i].toObject(), chat: chat || null })
 		}
+
 		return usersData
 	}
 

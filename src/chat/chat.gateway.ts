@@ -16,6 +16,7 @@ import {
 } from './dto'
 import { Socket } from 'socket.io'
 import { ClientUrl } from 'src/config/constants'
+import { LikeMessageDto } from './dto/message/like-message.dto'
 
 @WebSocketGateway({
 	cors: {
@@ -55,7 +56,7 @@ export class ChatGateway {
 		@MessageBody() createMessageDto: CreateMessageDto,
 		@ConnectedSocket() client: Socket
 	) {
-		await this.chatService.createMessage(createMessageDto, client)
+		return this.chatService.createMessage(createMessageDto, client)
 	}
 
 	@SubscribeMessage(MessageActions.edit)
@@ -72,5 +73,13 @@ export class ChatGateway {
 		@ConnectedSocket() client: Socket
 	) {
 		await this.chatService.deleteMessage(deleteMessageDto, client)
+	}
+
+	@SubscribeMessage(MessageActions.like)
+	async likeMessage(
+		@MessageBody() likeMessageDto: LikeMessageDto,
+		@ConnectedSocket() client: Socket
+	) {
+		await this.chatService.likeMessage(likeMessageDto, client)
 	}
 }

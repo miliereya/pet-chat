@@ -1,17 +1,17 @@
-import { Module } from '@nestjs/common';
-import { FileController } from './file.controller';
-import { FileService } from './file.service';
-import { path } from 'app-root-path';
-import { ServeStaticModule } from '@nestjs/serve-static';
+import { Module } from '@nestjs/common'
+import { FileController } from './file.controller'
+import { FileService } from './file.service'
+import { path } from 'app-root-path'
+import { ServeStaticModule } from '@nestjs/serve-static'
 
 @Module({
-  imports: [
+	imports: [
 		ServeStaticModule.forRoot({
 			rootPath: `${path}/uploads`,
 			serveRoot: '/uploads',
 		}),
 	],
-  controllers: [FileController],
-  providers: [FileService]
+	controllers: [FileController],
+	providers: [FileService],
 })
 export class FileModule {}
