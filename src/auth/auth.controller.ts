@@ -13,6 +13,7 @@ import {
 import { AuthService } from './auth.service'
 import { LoginDto, RegistrationDto } from './dto'
 import { Response, Request } from 'express'
+import { ClientUrl } from 'src/config/constants'
 
 @Controller('auth')
 export class AuthController {
@@ -20,7 +21,10 @@ export class AuthController {
 	@Post('registration')
 	async registration(@Body() dto: RegistrationDto, @Res() res: Response) {
 		const data = await this.authService.registration(dto)
-		res.cookie('refreshToken', data.tokens.refreshToken, { httpOnly: true })
+		res.cookie('refreshToken', data.tokens.refreshToken, {
+			httpOnly: true,
+			domain: ClientUrl,
+		})
 		delete data.tokens.refreshToken
 		return res.send(data)
 	}
@@ -29,7 +33,10 @@ export class AuthController {
 	@Post('login')
 	async login(@Body() dto: LoginDto, @Res() res: Response) {
 		const data = await this.authService.login(dto)
-		res.cookie('refreshToken', data.tokens.refreshToken, { httpOnly: true })
+		res.cookie('refreshToken', data.tokens.refreshToken, {
+			httpOnly: true,
+			domain: ClientUrl,
+		})
 		delete data.tokens.refreshToken
 		return res.send(data)
 	}
