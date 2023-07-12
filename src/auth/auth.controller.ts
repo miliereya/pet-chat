@@ -41,7 +41,6 @@ export class AuthController {
 			secure: true,
 		})
 		delete data.tokens.refreshToken
-		console.log(res)
 		return res.send(data)
 	}
 

@@ -22,9 +22,10 @@ export class UserService {
 	) {}
 
 	async findUsers(dto: FindUsersDto) {
+		const regexp = new RegExp(dto.value, 'i')
 		const query: TypeUserSearchMongooseParams = {
 			_id: { $ne: dto.userId },
-			[dto.searchField]: new RegExp(dto.value, 'i'),
+			$or: [{ username: regexp }, { email: regexp }],
 		}
 		const users = await this.userModel
 			.find(query)
