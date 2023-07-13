@@ -22,7 +22,6 @@ export class AuthController {
 		const data = await this.authService.registration(dto)
 		res.cookie('refreshToken', data.tokens.refreshToken, {
 			httpOnly: true,
-			domain: 'vercel.app',
 			sameSite: 'none',
 			secure: true,
 		})
@@ -36,7 +35,6 @@ export class AuthController {
 		const data = await this.authService.login(dto)
 		res.cookie('refreshToken', data.tokens.refreshToken, {
 			httpOnly: true,
-			domain: 'vercel.app',
 			sameSite: 'none',
 			secure: true,
 		})

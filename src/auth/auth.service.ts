@@ -129,7 +129,6 @@ export class AuthService {
 		await this.registration(shlepa2)
 
 		const users = await this.userService.findUsers({
-			searchField: 'username',
 			userId: '507f1f77bcf86cd799439011' as unknown as Types.ObjectId,
 			value: 'Shlepa',
 		})

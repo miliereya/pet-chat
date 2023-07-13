@@ -3,21 +3,18 @@ import { UserService } from './user.service'
 import { Auth } from 'src/auth/decorators/auth.decorator'
 import { UserId } from './decorators/userId.decorator'
 import { Types } from 'mongoose'
-import { TypeUserSearch } from './types'
 import { UpdateAvatarDto, UpdateUsernameDto } from './dto'
 
 @Controller('user')
 export class UserController {
 	constructor(private readonly userService: UserService) {}
-
 	@Get('find')
 	@Auth()
 	async findUsers(
 		@UserId() userId: Types.ObjectId,
-		@Query('search_by') searchField: TypeUserSearch,
 		@Query('value') value: string
 	) {
-		return this.userService.findUsers({ userId, value, searchField })
+		return this.userService.findUsers({ userId, value })
 	}
 
 	@Get(':_id')

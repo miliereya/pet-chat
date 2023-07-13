@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { Types } from 'mongoose'
+import { LikedBy } from '../types'
 
 @Schema({ timestamps: true })
 export class Message {
@@ -13,7 +14,7 @@ export class Message {
 	text: string
 
 	@Prop()
-	likedBy: Types.ObjectId[]
+	likedBy: LikedBy[]
 
 	@Prop()
 	attachedFiles: string[]

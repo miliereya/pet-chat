@@ -132,14 +132,14 @@ export class ChatService {
 	}
 
 	async likeMessage(likeMessageDto: LikeMessageDto, client: Socket) {
-		const message = await this.messageModel.findById(
-			likeMessageDto.messageId
-		)
-		message.likedBy.includes(likeMessageDto.userId)
+		const { avatarUrl, messageId, userId, username } = likeMessageDto
+
+		const message = await this.messageModel.findById(messageId)
+		message.likedBy.find((message) => message.userId === userId)
 			? (message.likedBy = message.likedBy.filter(
-					(user) => user !== likeMessageDto.userId
+					(user) => user.userId !== userId
 			  ))
-			: message.likedBy.push(likeMessageDto.userId)
+			: message.likedBy.push({ userId, username, avatarUrl })
 
 		await this.messageModel.findByIdAndUpdate(message._id, {
 			likedBy: message.likedBy,
